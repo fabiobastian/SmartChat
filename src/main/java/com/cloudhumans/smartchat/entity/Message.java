@@ -14,6 +14,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "message")
 public class Message extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

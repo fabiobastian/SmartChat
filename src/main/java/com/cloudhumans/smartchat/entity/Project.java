@@ -1,9 +1,7 @@
 package com.cloudhumans.smartchat.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.HashSet;
@@ -15,8 +13,11 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "project")
 public class Project extends BaseEntity {
-    String name;
+
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")

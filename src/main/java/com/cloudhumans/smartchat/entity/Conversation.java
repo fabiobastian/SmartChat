@@ -14,6 +14,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "conversation")
 public class Conversation extends BaseEntity {
 
     @Column(name = "helpdesk_id", nullable = false)

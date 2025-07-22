@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "section_retrieved")
 public class SectionRetrieved extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
