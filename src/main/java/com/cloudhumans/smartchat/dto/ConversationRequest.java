@@ -5,6 +5,6 @@ import java.util.List;
 public record ConversationRequest(
         Integer helpdeskId,
         String projectName,
-        List<Message> messages
+        List<MessageDTO> messages
 ) {
 }

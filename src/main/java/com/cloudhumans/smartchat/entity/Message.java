@@ -3,6 +3,7 @@ package com.cloudhumans.smartchat.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -31,7 +32,8 @@ public class Message extends BaseEntity {
     @Column(name = "retrieved_section", nullable = false)
     private boolean retrievedSection;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @JsonIgnore

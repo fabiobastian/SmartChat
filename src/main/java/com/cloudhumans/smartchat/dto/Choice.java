@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record Choice(
         int index,
-        Message message,
+        MessageDTO message,
         @JsonProperty("finish_reason")
         String finishReason
 ) {}

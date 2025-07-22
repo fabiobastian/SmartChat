@@ -3,9 +3,9 @@ package com.cloudhumans.smartchat.controller;
 import com.cloudhumans.smartchat.dto.ConversationRequest;
 import com.cloudhumans.smartchat.dto.ConversationResponse;
 import com.cloudhumans.smartchat.service.ConversationService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

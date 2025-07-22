@@ -4,7 +4,7 @@ import java.util.List;
 
 public record ChatCompletionRequest(
         String model,
-        List<Message> messages,
+        Double temperature,
         Integer max_tokens,
-        Double temperature
+        List<MessageDTO> messages
 ) {}

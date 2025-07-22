@@ -3,6 +3,7 @@ package com.cloudhumans.smartchat.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -27,7 +28,8 @@ public class Conversation extends BaseEntity {
     @Column(name = "handover_to_human_needed", nullable = false)
     private boolean handoverToHumanNeeded;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createAt;
 
     @JsonIgnore
