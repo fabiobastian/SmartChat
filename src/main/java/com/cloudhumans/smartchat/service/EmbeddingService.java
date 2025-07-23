@@ -13,6 +13,10 @@ public class EmbeddingService {
     private final OpenAIEmbeddingClient openAIEmbeddingClient;
 
     public EmbeddingResponse generateEmbedding(EmbeddingRequest request) {
-        return openAIEmbeddingClient.getEmbedding(request);
+        try {
+            return openAIEmbeddingClient.getEmbedding(request);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to process OpenAI embedding request");
+        }
     }
 }

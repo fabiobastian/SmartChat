@@ -13,10 +13,10 @@ public class SearchService {
     private final AzureSearchClient azureSearchClient;
 
     public SearchResponse searchRelevantQuestions(SearchRequest searchRequest) {
-        return azureSearchClient.search(searchRequest);
-    }
-
-    public SearchResponse searchRelevantQuestions2(SearchRequest searchRequest) {
-        return searchRelevantQuestions(searchRequest);
+        try {
+            return azureSearchClient.search(searchRequest);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to process Azure search request");
+        }
     }
 }

@@ -13,6 +13,10 @@ public class ChatService {
     private final OpenAIChatClient openAIChatClient;
 
     public ChatCompletionResponse getChatAnswer(ChatCompletionRequest request) {
-        return openAIChatClient.createChatCompletion(request);
+        try {
+            return openAIChatClient.createChatCompletion(request);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to process OpenAI completion request");
+        }
     }
 }

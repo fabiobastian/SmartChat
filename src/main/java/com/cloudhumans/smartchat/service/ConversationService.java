@@ -75,6 +75,24 @@ public class ConversationService {
         SearchResponse searchResponse = searchService.searchRelevantQuestions(searchRequest);
 
         if (searchResponse != null && searchResponse.odataCount() > 0) {
+
+            boolean handover = searchResponse.value().stream()
+                    .anyMatch(resultItem -> "N2".equalsIgnoreCase(resultItem.type()));
+
+            if (handover) {
+                Message chatMessage = new Message();
+                chatMessage.setConversation(message.getConversation());
+                chatMessage.setRole(Role.ASSISTANT);
+                chatMessage.setContent("I'm sorry, this issue should be handled by a human assistant.");
+                messageRepository.save(chatMessage);
+
+                List<MessageDTO> messages = List.of(
+                        new MessageDTO(Role.ASSISTANT, message.getContent()),
+                        new MessageDTO(Role.ASSISTANT, chatMessage.getContent())
+                );
+                return new ConversationResponse(true, messages, searchResponse.value());
+            }
+
             List<SectionRetrieved> sectionRetrieveds = searchResponse.value().stream()
                     .map(value -> new SectionRetrieved(message, value.searchScore(), value.content()))
                     .toList();
@@ -106,7 +124,6 @@ public class ConversationService {
 
         List<MessageDTO> messages = new ArrayList<>();
         messages.add(new MessageDTO(message.getRole(), message.getContent()));
-
         messages.addAll(chatCompletionResponse.choices().stream()
                         .map(Choice::message)
                         .toList()
