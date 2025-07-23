@@ -4,7 +4,7 @@ import java.util.List;
 
 public record ConversationResponse(
         boolean handoverToHumanNeeded,
-        List<SearchResultItem> sectionsRetrieved,
-        MessageDTO message
+        List<MessageDTO> messages,
+        List<SearchResultItem> sectionsRetrieved
 ) {
 }

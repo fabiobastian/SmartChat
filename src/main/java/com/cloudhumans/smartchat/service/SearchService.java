@@ -15,4 +15,8 @@ public class SearchService {
     public SearchResponse searchRelevantQuestions(SearchRequest searchRequest) {
         return azureSearchClient.search(searchRequest);
     }
+
+    public SearchResponse searchRelevantQuestions2(SearchRequest searchRequest) {
+        return searchRelevantQuestions(searchRequest);
+    }
 }

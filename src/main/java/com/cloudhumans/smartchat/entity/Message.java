@@ -26,11 +26,8 @@ public class Message extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", nullable = false, length = 10000)
     private String content;
-
-    @Column(name = "retrieved_section", nullable = false)
-    private boolean retrievedSection;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

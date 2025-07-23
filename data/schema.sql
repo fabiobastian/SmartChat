@@ -25,7 +25,6 @@ CREATE TABLE message (
                          conversation_id BIGINT NOT NULL,
                          role VARCHAR(10) NOT NULL CHECK (role IN ('USER', 'AGENT')),
                          content TEXT NOT NULL,
-                         retrieved_section BOOLEAN DEFAULT FALSE NOT NULL,
                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
                          CONSTRAINT fk_message_conversation

@@ -14,12 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.cloudhumans.smartchat.util.TextUtils.removeGreetings;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 @RequiredArgsConstructor
 @Service
 public class ConversationService {
 
+    public static final String ERROR_PROJECT_NOT_FOUND = "Project not found";
     public static final String MODEL_EMBEDDING= "text-embedding-3-large";
     public static final String MODEL_GPT= "gpt-4o";
 
@@ -36,7 +38,7 @@ public class ConversationService {
 
         Project project = projectRepository.findProjectByName(request.projectName())
                 .orElseThrow(() -> new ResponseStatusException(
-                UNPROCESSABLE_ENTITY, "Project not found"
+                UNPROCESSABLE_ENTITY, ERROR_PROJECT_NOT_FOUND
         ));
 
         Conversation conversation = conversationRepository
@@ -47,29 +49,35 @@ public class ConversationService {
                     return conversationRepository.save(newConv);
                 });
 
+        String fullMessage = request.messages().stream()
+                .filter(MessageDTO -> Role.USER == MessageDTO.role())
+                .map(MessageDTO::content)
+                .collect(Collectors.joining("\n"));
+
+        String cleanText = removeGreetings(fullMessage);
+
         Message message = new Message();
         message.setConversation(conversation);
-        message.setContent(request.messages().get(0).content()); // TODO se tiver mais mensagens ?
-        message.setRole(request.messages().get(0).role()); // TODO se tiver mais mensagens ?
+        message.setRole(Role.USER);
+        message.setContent(fullMessage);
         messageRepository.save(message);
 
         EmbeddingRequest embeddingRequest =
-                new EmbeddingRequest(MODEL_EMBEDDING, request.messages().get(0).content()); // TODO se tiver mais mensagens ?
+                new EmbeddingRequest(MODEL_EMBEDDING, cleanText);
         EmbeddingResponse embeddingResponse = embeddingService.generateEmbedding(embeddingRequest);
 
         List<VectorQuery> vectorQueries = new ArrayList<>();
-        vectorQueries.add(new VectorQuery(embeddingResponse.data().get(0).embedding(), 3, "embeddings", "vector"));
+        vectorQueries.add(new VectorQuery(embeddingResponse.data().getFirst().embedding(), 3, "embeddings", "vector"));
         String filter = String.format("projectName eq '%s'", project.getName());
 
         SearchRequest searchRequest =
                 new SearchRequest(true, "content, type", 10, filter, vectorQueries);
         SearchResponse searchResponse = searchService.searchRelevantQuestions(searchRequest);
-        // TODO ver se retornou algo e mudar o resultado na message retrieved_section=true
 
         if (searchResponse != null && searchResponse.odataCount() > 0) {
             List<SectionRetrieved> sectionRetrieveds = searchResponse.value().stream()
                     .map(value -> new SectionRetrieved(message, value.searchScore(), value.content()))
-                    .collect(Collectors.toList());
+                    .toList();
 
             sectionRetrievedRepository.saveAll(sectionRetrieveds);
 
@@ -77,20 +85,57 @@ public class ConversationService {
                     .map(s -> String.format("- %s", s.getContent()))
                     .collect(Collectors.joining("\n"));
 
-            List<MessageDTO> messageDTO = new ArrayList<>();
-            messageDTO.add(new MessageDTO(Role.SYSTEM,
-                    "You are a Tesla technical support assistant. Use the following information to provide the most accurate and helpful answers to the user's questions:\n\n" + context));
-
-            messageDTO.add(new MessageDTO(Role.USER, message.getContent()));
-
-            ChatCompletionRequest chatCompletionRequest =
-                    new ChatCompletionRequest(MODEL_GPT, 0.5, 400, messageDTO);
-            ChatCompletionResponse chatCompletionResponse = chatService.getChatAnswer(chatCompletionRequest);
-
-            return new ConversationResponse(false, searchResponse.value(), chatCompletionResponse.choices().get(0).message());
+            return getConversationResponse(context, message, searchResponse);
         }
         // TODO Pensar o que a aplicação deve fazer se o banco não retornar correspondencias
 
         return null;
+    }
+
+    private ConversationResponse getConversationResponse(String context, Message message, SearchResponse searchResponse) {
+        ChatCompletionResponse chatCompletionResponse = chatService
+                .getChatAnswer(getChatCompletionRequest(context, message));
+
+        Message chatMessage = new Message();
+        chatMessage.setConversation(message.getConversation());
+        chatMessage.setRole(Role.ASSISTANT);
+        chatMessage.setContent(chatCompletionResponse.choices().stream()
+                .map(choice -> choice.message().content())
+                .collect(Collectors.joining("\n")));
+        messageRepository.save(chatMessage);
+
+        List<MessageDTO> messages = new ArrayList<>();
+        messages.add(new MessageDTO(message.getRole(), message.getContent()));
+
+        messages.addAll(chatCompletionResponse.choices().stream()
+                        .map(Choice::message)
+                        .toList()
+        );
+
+        return new ConversationResponse(false, messages, searchResponse.value());
+    }
+
+    private static ChatCompletionRequest getChatCompletionRequest(String context, Message message) {
+        String systemPrompt = """
+        You are Claudia, Tesla's official support assistant. Your role is to provide accurate, friendly, and concise answers based on Tesla's documentation. Follow these rules strictly:
+        
+        1. **Persona**:
+           - Always introduce yourself: "I'm Claudia, your Tesla support assistant 😊".
+           - Use a warm but professional tone.
+        
+        2. **Response Format**:
+           - If user greets, respond with a greeting.
+           - End with: "Let me know if you need anything else!" + brand-related emoji.
+        
+        **Context**:
+        %s
+        """.formatted(context);
+
+        List<MessageDTO> messages = List.of(
+                new MessageDTO(Role.SYSTEM, systemPrompt),
+                new MessageDTO(Role.USER, message.getContent())
+        );
+
+        return new ChatCompletionRequest(MODEL_GPT, 0.5, 400, messages);
     }
 }
