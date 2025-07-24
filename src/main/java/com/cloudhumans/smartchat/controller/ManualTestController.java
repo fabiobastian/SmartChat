@@ -1,6 +1,11 @@
 package com.cloudhumans.smartchat.controller;
 
-import com.cloudhumans.smartchat.dto.*;
+import com.cloudhumans.smartchat.dto.chat.ChatCompletionRequest;
+import com.cloudhumans.smartchat.dto.chat.ChatCompletionResponse;
+import com.cloudhumans.smartchat.dto.embedding.EmbeddingRequest;
+import com.cloudhumans.smartchat.dto.embedding.EmbeddingResponse;
+import com.cloudhumans.smartchat.dto.search.SearchRequest;
+import com.cloudhumans.smartchat.dto.search.SearchResponse;
 import com.cloudhumans.smartchat.service.ChatService;
 import com.cloudhumans.smartchat.service.EmbeddingService;
 import com.cloudhumans.smartchat.service.SearchService;
@@ -33,6 +38,6 @@ public class ManualTestController {
 
     @PostMapping("/chat-completions")
     public ChatCompletionResponse getAnswer(@RequestBody ChatCompletionRequest request) {
-        return chatService.getChatAnswer(request);
+        return chatService.generateResponse(request);
     }
 }

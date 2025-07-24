@@ -1,8 +1,8 @@
 package com.cloudhumans.smartchat.client;
 
 import com.cloudhumans.smartchat.config.AzureSearchClientConfig;
-import com.cloudhumans.smartchat.dto.SearchRequest;
-import com.cloudhumans.smartchat.dto.SearchResponse;
+import com.cloudhumans.smartchat.dto.search.SearchRequest;
+import com.cloudhumans.smartchat.dto.search.SearchResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

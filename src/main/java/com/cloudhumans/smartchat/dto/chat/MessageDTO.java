@@ -1,4 +1,4 @@
-package com.cloudhumans.smartchat.dto;
+package com.cloudhumans.smartchat.dto.chat;
 
 import com.cloudhumans.smartchat.entity.Role;
 import jakarta.validation.constraints.Size;

@@ -1,4 +1,6 @@
-package com.cloudhumans.smartchat.dto;
+package com.cloudhumans.smartchat.dto.search;
+
+import com.cloudhumans.smartchat.dto.embedding.VectorQuery;
 
 import java.util.List;
 

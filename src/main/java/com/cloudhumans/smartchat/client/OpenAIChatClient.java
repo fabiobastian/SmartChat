@@ -1,8 +1,8 @@
 package com.cloudhumans.smartchat.client;
 
 import com.cloudhumans.smartchat.config.OpenAIClientConfig;
-import com.cloudhumans.smartchat.dto.ChatCompletionRequest;
-import com.cloudhumans.smartchat.dto.ChatCompletionResponse;
+import com.cloudhumans.smartchat.dto.chat.ChatCompletionRequest;
+import com.cloudhumans.smartchat.dto.chat.ChatCompletionResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

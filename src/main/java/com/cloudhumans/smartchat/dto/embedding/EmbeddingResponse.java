@@ -1,4 +1,6 @@
-package com.cloudhumans.smartchat.dto;
+package com.cloudhumans.smartchat.dto.embedding;
+
+import com.cloudhumans.smartchat.dto.chat.Usage;
 
 import java.util.List;
 

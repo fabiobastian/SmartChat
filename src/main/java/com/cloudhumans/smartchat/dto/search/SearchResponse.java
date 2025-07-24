@@ -1,4 +1,4 @@
-package com.cloudhumans.smartchat.dto;
+package com.cloudhumans.smartchat.dto.search;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

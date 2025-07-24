@@ -1,8 +1,8 @@
 package com.cloudhumans.smartchat.client;
 
 import com.cloudhumans.smartchat.config.OpenAIClientConfig;
-import com.cloudhumans.smartchat.dto.EmbeddingRequest;
-import com.cloudhumans.smartchat.dto.EmbeddingResponse;
+import com.cloudhumans.smartchat.dto.embedding.EmbeddingRequest;
+import com.cloudhumans.smartchat.dto.embedding.EmbeddingResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;

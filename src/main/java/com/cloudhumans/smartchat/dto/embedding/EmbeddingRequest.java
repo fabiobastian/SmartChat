@@ -1,4 +1,4 @@
-package com.cloudhumans.smartchat.dto;
+package com.cloudhumans.smartchat.dto.embedding;
 
 public record EmbeddingRequest(
         String model,

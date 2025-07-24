@@ -1,8 +1,8 @@
 package com.cloudhumans.smartchat.service;
 
 import com.cloudhumans.smartchat.client.OpenAIChatClient;
-import com.cloudhumans.smartchat.dto.ChatCompletionRequest;
-import com.cloudhumans.smartchat.dto.ChatCompletionResponse;
+import com.cloudhumans.smartchat.dto.chat.ChatCompletionRequest;
+import com.cloudhumans.smartchat.dto.chat.ChatCompletionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,7 @@ public class ChatService {
 
     private final OpenAIChatClient openAIChatClient;
 
-    public ChatCompletionResponse getChatAnswer(ChatCompletionRequest request) {
+    public ChatCompletionResponse generateResponse(ChatCompletionRequest request) {
         try {
             return openAIChatClient.createChatCompletion(request);
         } catch (Exception e) {

@@ -1,9 +1,9 @@
 package com.cloudhumans.smartchat.service;
 
 import com.cloudhumans.smartchat.client.AzureSearchClient;
-import com.cloudhumans.smartchat.dto.SearchRequest;
-import com.cloudhumans.smartchat.dto.SearchResponse;
-import com.cloudhumans.smartchat.dto.VectorQuery;
+import com.cloudhumans.smartchat.dto.search.SearchRequest;
+import com.cloudhumans.smartchat.dto.search.SearchResponse;
+import com.cloudhumans.smartchat.dto.embedding.VectorQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

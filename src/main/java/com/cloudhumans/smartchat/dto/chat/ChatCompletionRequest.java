@@ -1,4 +1,4 @@
-package com.cloudhumans.smartchat.dto;
+package com.cloudhumans.smartchat.dto.chat;
 
 import java.util.List;
 

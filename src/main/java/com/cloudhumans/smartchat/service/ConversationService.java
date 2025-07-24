@@ -1,6 +1,14 @@
 package com.cloudhumans.smartchat.service;
 
-import com.cloudhumans.smartchat.dto.*;
+import com.cloudhumans.smartchat.dto.chat.ChatCompletionRequest;
+import com.cloudhumans.smartchat.dto.chat.ChatCompletionResponse;
+import com.cloudhumans.smartchat.dto.chat.Choice;
+import com.cloudhumans.smartchat.dto.chat.MessageDTO;
+import com.cloudhumans.smartchat.dto.conversation.ConversationRequest;
+import com.cloudhumans.smartchat.dto.conversation.ConversationResponse;
+import com.cloudhumans.smartchat.dto.embedding.EmbeddingRequest;
+import com.cloudhumans.smartchat.dto.embedding.EmbeddingResponse;
+import com.cloudhumans.smartchat.dto.search.SearchResponse;
 import com.cloudhumans.smartchat.entity.*;
 import com.cloudhumans.smartchat.repository.ConversationRepository;
 import com.cloudhumans.smartchat.repository.MessageRepository;
@@ -36,7 +44,7 @@ public class ConversationService {
     private final MessageRepository messageRepository;
     private final SectionRetrievedRepository sectionRetrievedRepository;
 
-    public ConversationResponse getChatComplemention(ConversationRequest request) {
+    public ConversationResponse generateCompletion(ConversationRequest request) {
 
         Project project = projectRepository.findProjectByName(request.projectName())
                 .orElseThrow(() -> new ResponseStatusException(
@@ -124,7 +132,7 @@ public class ConversationService {
 
     private ConversationResponse getConversationResponse(String context, Message message, SearchResponse searchResponse, String brandDisplayName) {
         ChatCompletionResponse chatCompletionResponse = chatService
-                .getChatAnswer(getChatCompletionRequest(context, message, brandDisplayName));
+                .generateResponse(getChatCompletionRequest(context, message, brandDisplayName));
 
         Message chatMessage = new Message();
         chatMessage.setConversation(message.getConversation());

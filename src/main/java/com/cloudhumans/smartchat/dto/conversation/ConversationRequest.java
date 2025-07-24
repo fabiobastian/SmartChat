@@ -1,5 +1,6 @@
-package com.cloudhumans.smartchat.dto;
+package com.cloudhumans.smartchat.dto.conversation;
 
+import com.cloudhumans.smartchat.dto.chat.MessageDTO;
 import jakarta.validation.constraints.*;
 
 import java.util.List;
