@@ -7,8 +7,6 @@ COPY pom.xml .
 COPY mvnw .
 COPY mvnw.cmd .
 COPY .mvn/wrapper/ .mvn/wrapper/
-
-#Copy H2
 COPY data /app/data
 
 RUN ./mvnw dependency:go-offline -B
@@ -23,12 +21,13 @@ FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
 COPY --from=builder /app/target/smartchat-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=builder /app/data/h2db.mv.db /app/data/h2db.mv.db
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 RUN addgroup --system spring && adduser --system --ingroup spring spring
-RUN mkdir -p /app/data && chown spring:spring /app/data
+RUN chown -R spring:spring /app/data
 USER spring:spring
 
 EXPOSE 8080
