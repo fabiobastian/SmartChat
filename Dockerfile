@@ -9,6 +9,7 @@ COPY mvnw.cmd .
 COPY .mvn/wrapper/ .mvn/wrapper/
 COPY data /app/data
 
+RUN chmod +x mvnw
 RUN ./mvnw dependency:go-offline -B
 
 COPY src src
