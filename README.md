@@ -88,6 +88,40 @@ jdbc:h2:file:./data/h2db
 
 As configurações podem ser personalizadas no arquivo application.properties.
 
+## 🧠 Principais Decisões Técnicas
+
+### Java + Spring Boot
+
+- Produtividade com robustez: Usei Java com Spring Boot por oferecer rapidez no desenvolvimento de APIs RESTful com qualidade de produção. A estrutura do framework favorece a organização do projeto em camadas bem definidas.
+
+- Feign Client para comunicação externa: Escolhi OpenFeign por permitir chamadas HTTP limpas e tipadas, facilitando a integração com a API da OpenAI com pouco código e alta legibilidade.
+
+- Fácil integração com banco de dados, e opções de banco de dados como o H2 que se integra muito bem com o JPA, mantendo a modularidade, podendo ser migrado facilmente para bancos de dados como PostgreSQL ou Oracle.
+
+### Embeddings
+
+- Problema: Recebo diversas mensagens, como as devo processar?
+
+Para resolver este problema adotei a estratégia de, unir todas as mensagens vindas por meio da rule=user, e remover as saudações do usuário, como Hello, Morning, etc. Retiro as saudações por elas não trazerem um valor semântico a frase, com está grande frase faço o embedding e posteriormente pesquiso as perguntas+respostas correspondentes no Azure.
+
+Posteriormente com todas as informações em mãos, faço o prompt para enviar para o ChatGPT, porém não envio a mensagem com as saudações retiradas, envio a mensagem original do usuário, para que assim a IA consiga responder da forma mais natural possível, saudando o usuário de volta.
+
+### Escalar para N2
+
+- Problema: Em qual momento, e qual estratégia devo utilizar para escalar o problema para N2?
+
+Adotei a estratégia de **Option 2: Handover Feature**, que basicamente diz que: quando o banco vetorial retornar uma resposta do type=N2, o atendimento deve ser escalado para um atendente humano, enviando o handoverToHumanNeeded: true na resposta.
+
+Acredito que por se tratar de uma POC está seja a solução mais viável, por conta da feature de esclarecimento não estar muito clara quais devem ser os parâmetros utilizados, e ser muito mais regras de negócio.
+
+### Fluxo do Chatbot
+
+- Recebe a pergunta do usuário
+- Gera embeddings da pergunta
+- Busca trechos relevantes no banco vetorial
+- Envia pergunta + contexto para o LLM gerar a resposta
+
+
 ## 📌 Observações
 
 - Certifique-se de que o índice no Azure Search já está criado e populado antes de iniciar a aplicação.
