@@ -19,6 +19,9 @@ public class Project extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "display_name")
+    private String displayName;
+
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
     private Set<Conversation> conversation = new HashSet<>();

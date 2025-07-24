@@ -21,9 +21,11 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 @Service
 public class ConversationService {
 
-    public static final String ERROR_PROJECT_NOT_FOUND = "Project not found";
-    public static final String MODEL_EMBEDDING= "text-embedding-3-large";
-    public static final String MODEL_GPT= "gpt-4o";
+    private static final String ERROR_PROJECT_NOT_FOUND = "Project not found";
+    private static final String MODEL_EMBEDDING= "text-embedding-3-large";
+    private static final String MODEL_GPT= "gpt-4o";
+    private static final double TEMPERATURE_GPT = 0.6;
+    private static final int MAX_TOKENS_GPT = 500;
 
     private final EmbeddingService embeddingService;
     private final SearchService searchService;
@@ -66,53 +68,63 @@ public class ConversationService {
                 new EmbeddingRequest(MODEL_EMBEDDING, cleanText);
         EmbeddingResponse embeddingResponse = embeddingService.generateEmbedding(embeddingRequest);
 
-        List<VectorQuery> vectorQueries = new ArrayList<>();
-        vectorQueries.add(new VectorQuery(embeddingResponse.data().getFirst().embedding(), 3, "embeddings", "vector"));
-        String filter = String.format("projectName eq '%s'", project.getName());
-
-        SearchRequest searchRequest =
-                new SearchRequest(true, "content, type", 10, filter, vectorQueries);
-        SearchResponse searchResponse = searchService.searchRelevantQuestions(searchRequest);
+        SearchResponse searchResponse = searchService.searchByEmbedding(
+                embeddingResponse.data().getFirst().embedding(),
+                project.getName()
+        );
 
         if (searchResponse != null && searchResponse.odataCount() > 0) {
 
-            boolean handover = searchResponse.value().stream()
-                    .anyMatch(resultItem -> "N2".equalsIgnoreCase(resultItem.type()));
-
-            if (handover) {
-                Message chatMessage = new Message();
-                chatMessage.setConversation(message.getConversation());
-                chatMessage.setRole(Role.ASSISTANT);
-                chatMessage.setContent("I'm sorry, this issue should be handled by a human assistant.");
-                messageRepository.save(chatMessage);
-
-                List<MessageDTO> messages = List.of(
-                        new MessageDTO(Role.ASSISTANT, message.getContent()),
-                        new MessageDTO(Role.ASSISTANT, chatMessage.getContent())
-                );
-                return new ConversationResponse(true, messages, searchResponse.value());
+            ConversationResponse escalationResponse = handleN2Escalation(searchResponse, message);
+            if (escalationResponse != null) {
+                conversation.setHandoverToHumanNeeded(true);
+                conversationRepository.save(conversation);
+                return escalationResponse;
             }
 
             List<SectionRetrieved> sectionRetrieveds = searchResponse.value().stream()
                     .map(value -> new SectionRetrieved(message, value.searchScore(), value.content()))
                     .toList();
-
             sectionRetrievedRepository.saveAll(sectionRetrieveds);
 
-            String context = sectionRetrieveds.stream()
+            String questionsContext = sectionRetrieveds.stream()
                     .map(s -> String.format("- %s", s.getContent()))
                     .collect(Collectors.joining("\n"));
 
-            return getConversationResponse(context, message, searchResponse);
+            return getConversationResponse(questionsContext, message, searchResponse, project.getDisplayName());
         }
-        // TODO Pensar o que a aplicação deve fazer se o banco não retornar correspondencias
 
+        return new ConversationResponse(true, getMessagesN2Escalation(message), List.of());
+    }
+
+    private ConversationResponse handleN2Escalation(SearchResponse searchResponse, Message message) {
+        boolean handover = searchResponse.value().stream()
+                .anyMatch(resultItem -> "N2".equalsIgnoreCase(resultItem.type()));
+
+        if (handover) {
+            List<MessageDTO> messages = getMessagesN2Escalation(message);
+            return new ConversationResponse(true, messages, searchResponse.value());
+        }
         return null;
     }
 
-    private ConversationResponse getConversationResponse(String context, Message message, SearchResponse searchResponse) {
+    private List<MessageDTO> getMessagesN2Escalation(Message message) {
+        Message chatMessage = new Message();
+        chatMessage.setConversation(message.getConversation());
+        chatMessage.setRole(Role.ASSISTANT);
+        chatMessage.setContent("I'm sorry I couldn't resolve this for you! 😊 Let me connect you with one of our " +
+                "human specialists who can give this the attention it deserves. Please hold while I transfer you!");
+        messageRepository.save(chatMessage);
+
+        return List.of(
+                new MessageDTO(Role.USER, message.getContent()),
+                new MessageDTO(Role.ASSISTANT, chatMessage.getContent())
+        );
+    }
+
+    private ConversationResponse getConversationResponse(String context, Message message, SearchResponse searchResponse, String brandDisplayName) {
         ChatCompletionResponse chatCompletionResponse = chatService
-                .getChatAnswer(getChatCompletionRequest(context, message));
+                .getChatAnswer(getChatCompletionRequest(context, message, brandDisplayName));
 
         Message chatMessage = new Message();
         chatMessage.setConversation(message.getConversation());
@@ -132,12 +144,12 @@ public class ConversationService {
         return new ConversationResponse(false, messages, searchResponse.value());
     }
 
-    private static ChatCompletionRequest getChatCompletionRequest(String context, Message message) {
+    private static ChatCompletionRequest getChatCompletionRequest(String context, Message message, String brandDisplayName) {
         String systemPrompt = """
-        You are Claudia, Tesla's official support assistant. Your role is to provide accurate, friendly, and concise answers based on Tesla's documentation. Follow these rules strictly:
+        You are Claudia, the official virtual support assistant for %s. Your role is to provide accurate, friendly, and concise answers based on the company's documentation. Follow these rules strictly:
         
         1. **Persona**:
-           - Always introduce yourself: "I'm Claudia, your Tesla support assistant 😊".
+           - Always introduce yourself: "I'm Claudia, your %s support assistant 😊".
            - Use a warm but professional tone.
         
         2. **Response Format**:
@@ -146,13 +158,17 @@ public class ConversationService {
         
         **Context**:
         %s
-        """.formatted(context);
+        """.formatted(
+                brandDisplayName,
+                brandDisplayName,
+                context
+        );
 
         List<MessageDTO> messages = List.of(
                 new MessageDTO(Role.SYSTEM, systemPrompt),
                 new MessageDTO(Role.USER, message.getContent())
         );
 
-        return new ChatCompletionRequest(MODEL_GPT, 0.5, 400, messages);
+        return new ChatCompletionRequest(MODEL_GPT, TEMPERATURE_GPT, MAX_TOKENS_GPT, messages);
     }
 }
