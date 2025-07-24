@@ -2,6 +2,8 @@ package com.cloudhumans.smartchat.util;
 
 public class TextUtils {
 
+    private TextUtils() {}
+
     /**
      * Removes common English greetings from the beginning of a text.
      *

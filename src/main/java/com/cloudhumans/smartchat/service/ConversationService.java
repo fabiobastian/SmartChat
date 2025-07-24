@@ -1,5 +1,6 @@
 package com.cloudhumans.smartchat.service;
 
+import com.cloudhumans.smartchat.config.OpenAiChatProperties;
 import com.cloudhumans.smartchat.dto.chat.ChatCompletionRequest;
 import com.cloudhumans.smartchat.dto.chat.ChatCompletionResponse;
 import com.cloudhumans.smartchat.dto.chat.Choice;
@@ -15,7 +16,9 @@ import com.cloudhumans.smartchat.repository.MessageRepository;
 import com.cloudhumans.smartchat.repository.ProjectRepository;
 import com.cloudhumans.smartchat.repository.SectionRetrievedRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -30,10 +33,8 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 public class ConversationService {
 
     private static final String ERROR_PROJECT_NOT_FOUND = "Project not found";
-    private static final String MODEL_EMBEDDING= "text-embedding-3-large";
-    private static final String MODEL_GPT= "gpt-4o";
-    private static final double TEMPERATURE_GPT = 0.6;
-    private static final int MAX_TOKENS_GPT = 500;
+    private static final String MODEL_EMBEDDING = "text-embedding-3-large";
+    private final OpenAiChatProperties chatProps;
 
     private final EmbeddingService embeddingService;
     private final SearchService searchService;
@@ -44,6 +45,7 @@ public class ConversationService {
     private final MessageRepository messageRepository;
     private final SectionRetrievedRepository sectionRetrievedRepository;
 
+    @Transactional
     public ConversationResponse generateCompletion(ConversationRequest request) {
 
         Project project = projectRepository.findProjectByName(request.projectName())
@@ -130,7 +132,11 @@ public class ConversationService {
         );
     }
 
-    private ConversationResponse getConversationResponse(String context, Message message, SearchResponse searchResponse, String brandDisplayName) {
+    private ConversationResponse getConversationResponse(String context,
+                                                         Message message,
+                                                         SearchResponse searchResponse,
+                                                         String brandDisplayName
+    ) {
         ChatCompletionResponse chatCompletionResponse = chatService
                 .generateResponse(getChatCompletionRequest(context, message, brandDisplayName));
 
@@ -152,7 +158,7 @@ public class ConversationService {
         return new ConversationResponse(false, messages, searchResponse.value());
     }
 
-    private static ChatCompletionRequest getChatCompletionRequest(String context, Message message, String brandDisplayName) {
+    private ChatCompletionRequest getChatCompletionRequest(String context, Message message, String brandDisplayName) {
         String systemPrompt = """
         You are Claudia, the official virtual support assistant for %s. Your role is to provide accurate, friendly, and concise answers based on the company's documentation. Follow these rules strictly:
         
@@ -177,6 +183,6 @@ public class ConversationService {
                 new MessageDTO(Role.USER, message.getContent())
         );
 
-        return new ChatCompletionRequest(MODEL_GPT, TEMPERATURE_GPT, MAX_TOKENS_GPT, messages);
+        return new ChatCompletionRequest(chatProps.getModel(), chatProps.getTemperature(), chatProps.getMaxTokens(), messages);
     }
 }

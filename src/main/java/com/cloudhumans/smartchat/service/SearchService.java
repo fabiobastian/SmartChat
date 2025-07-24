@@ -5,7 +5,9 @@ import com.cloudhumans.smartchat.dto.search.SearchRequest;
 import com.cloudhumans.smartchat.dto.search.SearchResponse;
 import com.cloudhumans.smartchat.dto.embedding.VectorQuery;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -28,7 +30,7 @@ public class SearchService {
         try {
             return azureSearchClient.search(searchRequest);
         } catch (Exception e) {
-            throw new RuntimeException(ERROR_FEIGN_PROCESS_AZURE);
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, ERROR_FEIGN_PROCESS_AZURE, e);
         }
     }
 
