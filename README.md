@@ -11,10 +11,11 @@ Este projeto implementa a técnica **RAG (Retrieval Augmented Generation)** para
 ### Tecnologias Principais:
 
 - Java + Spring Boot
+- Spring Cloud OpenFeign
 - OpenAI Embeddings + GPT
-- Docker
 - Banco de dados vetorial Azure AI Search
 - Banco de dados relacional H2
+- Docker
 
 ---
 
@@ -49,7 +50,7 @@ AZURE_SEARCH_API_KEY=<sua_chave_aqui>
 ```
 A criação do .env é opcional, mas facilita a execução do contêiner.
 
-### 4. Execute o contêiner com Docker usando a imagem "smarchat"
+### 4. Execute o contêiner com Docker
 
 Com **.env**
 ```
@@ -57,7 +58,7 @@ docker run -d --env-file .env -p 8080:8080 smartchat
 ```
 Sem **.env**
 ```
-docker run -d -p 8080:8080 -e "OPENAI_API_KEY=<sua_chave_aqui>" -e "<sua_chave_aqui>" smartchat
+docker run -d -p 8080:8080 -e "OPENAI_API_KEY=<sua_chave_aqui>" -e "AZURE_SEARCH_API_KEY=<sua_chave_aqui>" smartchat
 ```
 
 ## 🌐 Acessos Úteis
