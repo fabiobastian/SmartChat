@@ -114,7 +114,24 @@ Adotei a estratégia de **Option 2: Handover Feature**, que basicamente diz que:
 
 Acredito que por se tratar de uma POC está seja a solução mais viável, por conta da feature de esclarecimento não estar muito clara quais devem ser os parâmetros utilizados, e ser muito mais regras de negócio.
 
-### Fluxo do Chatbot
+### Banco de Dados
+
+![diagrama ER](./documents/ER_diagram.png)
+
+Escolhi por implementar um banco de dados relacional na minha aplicação, acredito que numa implementação maior, utilizando microsserviços, está minha API seja apenas um pequeno pedaço com responsabilidade limitada a geração de respostas a partir de uma entrada bem definida.
+
+Porém, como gostaria de mostrar mais o que sei, decide fazer um ecosistema maior, com mais responsabilidades, como a gerência de projetos conforme o project.name, e com isso ter o controle das diferentes mensagens, conversas e também guardar os contextos resgatadas da Azure.
+
+Com este esquema de banco de dados é possível cadastrar mais projetos, conforme o nome e ‘slogan’ do cliente, mudando assim onde é buscado na Azure e a quem a IA responde como assistente.
+
+Também é possível ter o histórico completo de conversar, e mensagens trocadas entre o usuário e o assistente(IA), podendo assim retornar ao cliente no front de forma simples.
+
+Com o histórico de mensagens trocadas e os contextos resgatados salvos, podemos assim se for preciso, antes mesmo de receber a pergunta do usuário, podemos contextualizar a IA para assim receber a resposta mais precisa, também pode ser projetado para dígamos, sempre contextualizar a IA com as últimas perguntas feitas num intervalo de 15 minutos, assim utilizando na resposta um contexto mais amplo.
+
+Seguindo mais no âmbito do chatbox, usando as perguntas feitas pelo usuário, os contextos resgatados, e as respostas dada pelo assistente(IA), conseguimos avaliar a assertividade do modelo, utilizando IAs treinadas para avaliar as respostas, e assim dar nota para cada resposta/atendimento.
+
+
+## Fluxo do Chatbot
 
 - Recebe a pergunta do usuário
 - Gera embeddings da pergunta
