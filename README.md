@@ -112,7 +112,7 @@ Posteriormente com todas as informações em mãos, faço o prompt para enviar p
 
 Adotei a estratégia de **Option 2: Handover Feature**, que basicamente diz que: quando o banco vetorial retornar uma resposta do type=N2, o atendimento deve ser escalado para um atendente humano, enviando o handoverToHumanNeeded: true na resposta.
 
-Acredito que por se tratar de uma POC está seja a solução mais viável, por conta da feature de esclarecimento não estar muito clara quais devem ser os parâmetros utilizados, e ser muito mais regras de negócio.
+Acredito que por se tratar de uma POC está seja a solução mais viável, por conta da feature de esclarecimento não estar muito clara quais devem ser os parâmetros utilizados, e ser muito mais ligada a regras de negócio.
 
 ### Banco de Dados
 
@@ -130,6 +130,46 @@ Com o histórico de mensagens trocadas e os contextos resgatados salvos, podemos
 
 Seguindo mais no âmbito do chatbox, usando as perguntas feitas pelo usuário, os contextos resgatados, e as respostas dada pelo assistente(IA), conseguimos avaliar a assertividade do modelo, utilizando IAs treinadas para avaliar as respostas, e assim dar nota para cada resposta/atendimento.
 
+## Aprimoramentos Identificados
+
+1. Processamento Avançado de Mensagens
+
+Atualmente, as mensagens do usuário são concatenadas antes de gerar embeddings, o que pode diluir o contexto em conversas com múltiplos tópicos. Uma melhoria seria:
+
+Embedding por mensagem: Gerar vetores individuais para cada entrada do usuário, permitindo identificar perguntas distintas e responder de forma mais direcionada.
+
+Agrupamento semântico: Usar similaridade vetorial (ex: cosine similarity) para agrupar mensagens relacionadas e tratar tópicos separadamente.
+
+2. Aprimoramento do Contexto
+
+Seleção dinâmica de contexto: Priorizar trechos relevantes com base na última mensagem, mantendo histórico curto para evitar poluição.
+
+HyDE (Hypothetical Document Embeddings): Gerar uma resposta hipotética antes da busca vetorial, refinando a recuperação de informações.
+
+3. Controle de Fluxo da Conversa
+
+Detecção de mudança de tópico: Alertar o usuário quando perguntas não relacionadas forem detectadas (ex: "Parece que mudou de assunto. Devo focar na última pergunta?").
+
+Respostas multifacetadas: Para consultas com vários temas, segmentar a resposta claramente (ex: "Sobre X: [...]. Sobre Y: [...]").
+
+4. Aprimoramento no Tratamento de Erros
+
+Respostas de erro mais descritivas e personalizadas, substituindo as mensagens genéricas dos validators (@NotBlank, @Min, etc.) por explicações claras e orientações para correção.
+
+5. Sistema de Histórico de Conversas
+   
+Seria interessante ter um endpoint dedicado para recuperação do histórico completo das interações, permitindo:
+
+- Consulta por ID de conversa
+- Filtragem por período específico
+
+6. Melhoria na Observabilidade
+
+Pode ser implementado logs estruturados com @Slf4j para o melhor controle do fluxo na aplicação, que permite:
+
+- Rastreamento do fluxo de processamento
+- Identificação rápida de pontos de falha
+- Monitoramento de desempenho por etapa (embedding, busca, geração)
 
 ## Fluxo do Chatbot
 
@@ -138,6 +178,9 @@ Seguindo mais no âmbito do chatbox, usando as perguntas feitas pelo usuário, o
 - Busca trechos relevantes no banco vetorial
 - Envia pergunta + contexto para o LLM gerar a resposta
 
+## Fluxo ConversationService (service principal)
+
+![Diagrama de Sequência UML](./documents/UML_diagrama.png)
 
 ## 📌 Observações
 
