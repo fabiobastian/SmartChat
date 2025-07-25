@@ -184,5 +184,7 @@ Pode ser implementado logs estruturados com @Slf4j para o melhor controle do flu
 
 ## 📌 Observações
 
+- O banco H2 já vem cadastrada com o cliente Tesla Motors, porém se foi excluído ou perdeu-se de alguma forma, para recuperar esse registro **essencial**, só basta executar o insert do arquivo **data/data.sql** no console do H2.
+- A cada nova mensagem enviada, caso o **helpdeskId** ainda não tenha sido cadastrado, sinalizando que é a primeira mensagem, será cadastrado uma nova conversa, e assim as próximas mensagens que vierem com este **helpdeskId** serão associadas a conversa criada.
 - Certifique-se de que o índice no Azure Search já está criado e populado antes de iniciar a aplicação.
 - A aplicação está configurada para ser facilmente executada via Docker, mas também pode rodar localmente com Maven.
